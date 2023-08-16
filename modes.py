@@ -13,17 +13,20 @@ class MainMode(object):
             elif self.mode is CHASE:
                 self.scatter()
 
+    #predefined behavior
     def scatter(self):
         self.mode = SCATTER
         self.time = 7
         self.timer = 0
 
+    #predefined behavior
     def chase(self):
         self.mode = CHASE
         self.time = 20
         self.timer = 0
 
 
+#this is the current way that the game is changing the AI patterns
 class ModeController(object):
     def __init__(self, entity):
         self.timer = 0

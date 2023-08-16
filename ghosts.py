@@ -5,6 +5,7 @@ from constants import *
 from entity import Entity
 from modes import ModeController
 from sprites import GhostSprites
+from bt import BT
 
 class Ghost(Entity):
     def __init__(self, node, pacman=None, blinky=None):
@@ -17,6 +18,10 @@ class Ghost(Entity):
         self.mode = ModeController(self)
         self.blinky = blinky
         self.homeNode = node
+
+
+        #not a functional structure
+        # self.bt = BT(self)
 
     def reset(self):
         Entity.reset(self)
@@ -31,6 +36,11 @@ class Ghost(Entity):
         elif self.mode.current is CHASE:
             self.chase()
         Entity.update(self, dt)
+
+    # def update(self, dt):
+    #     self.sprites.update(dt)
+    #     self.behavior_tree.update(dt)
+    #     Entity.update(self, dt)
 
     def scatter(self):
         self.goal = Vector2()
@@ -136,6 +146,14 @@ class GhostGroup(object):
     def update(self, dt):
         for ghost in self:
             ghost.update(dt)
+
+    # def update(self, dt):
+    #     for ghost in self:
+    #         ghost.bt.update(dt)
+    
+    # def startBehavior(self, behavior_class):
+    #     for ghost in self:
+    #         ghost.bt.start_behavior(behavior_class)
 
     def startFreight(self):
         for ghost in self:
