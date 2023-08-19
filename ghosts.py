@@ -5,7 +5,10 @@ from constants import *
 from entity import Entity
 from modes import ModeController
 from sprites import GhostSprites
-from bt import BT
+from bt_nodes import *
+from behaviors import *
+from bt_nodes import Selector, Sequence, Action, Check
+import logging
 
 class Ghost(Entity):
     def __init__(self, node, pacman=None, blinky=None):
@@ -18,10 +21,6 @@ class Ghost(Entity):
         self.mode = ModeController(self)
         self.blinky = blinky
         self.homeNode = node
-
-
-        #not a functional structure
-        # self.bt = BT(self)
 
     def reset(self):
         Entity.reset(self)
@@ -36,11 +35,6 @@ class Ghost(Entity):
         elif self.mode.current is CHASE:
             self.chase()
         Entity.update(self, dt)
-
-    # def update(self, dt):
-    #     self.sprites.update(dt)
-    #     self.behavior_tree.update(dt)
-    #     Entity.update(self, dt)
 
     def scatter(self):
         self.goal = Vector2()
@@ -72,6 +66,99 @@ class Ghost(Entity):
         self.directionMethod = self.goalDirection
         self.homeNode.denyAccess(DOWN, self)
 
+    # def setup_behavior_tree(self):
+    #     root = Selector(name='High Level Ordering of Strategies')
+    #     chase_behavior = Action(Ghost.chase)
+    #     scatter_behavior = Action(Ghost.scatter)
+    #     root.child_nodes = [scatter_behavior, chase_behavior]
+    #     logging.info('\n' + root.tree_to_string())
+    #     return root
+    
+class Behaviors(Ghost):
+
+    def selector(self):
+        
+        # ghostAlreadyChasing = False
+        #
+        # lastPowerUp = False
+        # guardPowerUp = False
+        #
+        # fruitSpawned = False
+        # guardFruit = False
+        #
+        # pacmanPosition = inf
+        #
+        # groupOne = False
+        # parterOne = None
+        # parterTwo = None
+        #
+        # if not groupTwo:
+        #   if partnerOne == None:
+        #       partnerOne = self.GHOST
+        #       continue
+        #   else if partnerTwo == None:
+        #       partnerTwo = self.GHOST
+        #       continue
+        #   else if partnerThree == None:
+        #       partnerTwo = self.GHOST
+        #   else if partnerFour == None:
+        #       partnerTwo = self.GHOST
+        #
+        # If pacman.pos > 10 units:
+        #   if ghostAlreadyChasing:
+        #       continue
+        #   else:
+        #       ghostAlreadyChasing = True
+        #       self.defaultChase()
+        #
+        # else if fruitSpawned:
+        #   distance = fruit.pos - ghost.pos
+        #   if distance <= 5:
+        #       if not guardFruit:
+        #           self.guardFruit()
+        #           guardFruit = True
+        #       else:
+        #           continue
+        #
+        # else if lastPowerUp:
+        #   if not guardPowerUp:
+        #       guardPowerUp = True
+        #       self.guardPower()
+        #   else:
+        #       continute
+        #
+        #
+        #
+        # else:
+        #   self.defaultChase()
+
+        pass
+
+    def defaultChase(self):
+        return self.pacman.position
+
+    def cutoff(self):
+        return self.pacman.position + self.pacman.directions[self.pacman.direction] * TILEWIDTH * 4
+    
+    def reverseCutOff(self):
+        return self.pacman.position - self.pacman.directions[self.pacman.direction] * TILEWIDTH * 4
+
+    def guardFruit(self):
+        # return self.fruit.position * 1
+        pass
+
+    def guardPower(self):
+        # return self.powerup.position * 1     Closest powerup to pacman
+        pass
+
+    def groupUp(self):
+        pass
+
+    
+
+     # def collaborate(self):
+    #     pass
+  
 
 
 
@@ -82,6 +169,9 @@ class Blinky(Ghost):
         self.color = RED
         self.sprites = GhostSprites(self)
 
+    def dosomething(self):
+        pass
+        #self.goal = 
 
 class Pinky(Ghost):
     def __init__(self, node, pacman=None, blinky=None):
@@ -95,6 +185,7 @@ class Pinky(Ghost):
 
     def chase(self):
         self.goal = self.pacman.position + self.pacman.directions[self.pacman.direction] * TILEWIDTH * 4
+    
 
 
 class Inky(Ghost):
@@ -111,6 +202,7 @@ class Inky(Ghost):
         vec1 = self.pacman.position + self.pacman.directions[self.pacman.direction] * TILEWIDTH * 2
         vec2 = (vec1 - self.blinky.position) * 2
         self.goal = self.blinky.position + vec2
+
 
 
 class Clyde(Ghost):
@@ -130,15 +222,16 @@ class Clyde(Ghost):
             self.scatter()
         else:
             self.goal = self.pacman.position + self.pacman.directions[self.pacman.direction] * TILEWIDTH * 4
+    
 
 
 class GhostGroup(object):
     def __init__(self, node, pacman):
         self.blinky = Blinky(node, pacman)
-        self.pinky = Pinky(node, pacman)
-        self.inky = Inky(node, pacman, self.blinky)
-        self.clyde = Clyde(node, pacman)
-        self.ghosts = [self.blinky, self.pinky, self.inky, self.clyde]
+        # self.pinky = Pinky(node, pacman)
+        # self.inky = Inky(node, pacman, self.blinky)
+        # self.clyde = Clyde(node, pacman)
+        self.ghosts = [self.blinky]#, self.pinky, self.inky, self.clyde]
 
     def __iter__(self):
         return iter(self.ghosts)
@@ -147,13 +240,6 @@ class GhostGroup(object):
         for ghost in self:
             ghost.update(dt)
 
-    # def update(self, dt):
-    #     for ghost in self:
-    #         ghost.bt.update(dt)
-    
-    # def startBehavior(self, behavior_class):
-    #     for ghost in self:
-    #         ghost.bt.start_behavior(behavior_class)
 
     def startFreight(self):
         for ghost in self:
@@ -187,4 +273,3 @@ class GhostGroup(object):
     def render(self, screen):
         for ghost in self:
             ghost.render(screen)
-

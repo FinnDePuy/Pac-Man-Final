@@ -1,3 +1,7 @@
+
+def chase_behavior():
+    self.goal = self.pacman.position
+
 class Behavior:
     def __init__(self, ghost):
         self.ghost = ghost

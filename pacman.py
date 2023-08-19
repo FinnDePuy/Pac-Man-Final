@@ -58,6 +58,14 @@ class Pacman(Entity):
             return LEFT
         if key_pressed[K_RIGHT]:
             return RIGHT
+        if key_pressed[K_w]:
+            return UP
+        if key_pressed[K_s]:
+            return DOWN
+        if key_pressed[K_a]:
+            return LEFT
+        if key_pressed[K_d]:
+            return RIGHT
         return STOP  
 
     def eatPellets(self, pelletList):
