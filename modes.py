@@ -16,7 +16,7 @@ class MainMode(object):
     #predefined behavior
     def scatter(self):
         self.mode = SCATTER
-        self.time = 7
+        self.time = 0
         self.timer = 0
 
     #predefined behavior

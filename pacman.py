@@ -15,6 +15,15 @@ class Pacman(Entity):
         self.alive = True
         self.sprites = PacmanSprites(self)
 
+        # Dictionaries for behaviors
+        self.isChasing = {BLINKY : False, PINKY : False, INKY : False, CLYDE : False}
+        self.isCutoff = {BLINKY : False, PINKY : False, INKY : False, CLYDE : False}
+        self.lastPowerUp = {BLINKY : False, PINKY : False, INKY : False, CLYDE : False}
+        self.guardPowerUp = {BLINKY : False, PINKY : False, INKY : False, CLYDE : False}
+        self.fruitSpawned = {BLINKY : False, PINKY : False, INKY : False, CLYDE : False}
+        self.guardFruit = {BLINKY : False, PINKY : False, INKY : False, CLYDE : False}
+        
+
     def reset(self):
         Entity.reset(self)
         self.direction = LEFT

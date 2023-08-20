@@ -40,7 +40,8 @@ class Ghost(Entity):
         self.goal = Vector2()
 
     def chase(self):
-        self.goal = self.pacman.position
+        # self.goal = self.pacman.position
+        self.goal = Behaviors.selector(self)
 
     def spawn(self):
         self.goal = self.spawnNode.position
@@ -73,21 +74,34 @@ class Ghost(Entity):
     #     root.child_nodes = [scatter_behavior, chase_behavior]
     #     logging.info('\n' + root.tree_to_string())
     #     return root
+
     
 class Behaviors(Ghost):
+    # Helper function to check if any ghost is chasing
+    def checkIsChasing(self):
+        for key, value in self.pacman.isChasing.items():
+            if value == True:
+                return True
+        return False
+    
+    # Helper function to check if any ghost is cutting off
+    def checkIsCutoff(self):
+        for key, value in self.pacman.isCutoff.items():
+            if value == True:
+                return True
+        return False
 
     def selector(self):
         
-        # ghostAlreadyChasing = False
-        #
-        # lastPowerUp = False
-        # guardPowerUp = False
-        #
-        # fruitSpawned = False
-        # guardFruit = False
-        #
-        # pacmanPosition = inf
-        #
+        #used to calculate distance if needed in behaviors
+        d = self.pacman.position - self.position
+        ds = d.magnitudeSquared()
+        numTiles = 8
+        # if ds <= (TILEWIDTH * numTiles)**2:
+        #this is saying if the ghost is less than or equal to numtiles away from pacman
+        
+        
+        
         # groupOne = False
         # parterOne = None
         # parterTwo = None
@@ -104,13 +118,29 @@ class Behaviors(Ghost):
         #   else if partnerFour == None:
         #       partnerTwo = self.GHOST
         #
-        # If pacman.pos > 10 units:
-        #   if ghostAlreadyChasing:
-        #       continue
-        #   else:
-        #       ghostAlreadyChasing = True
-        #       self.defaultChase()
-        #
+
+        # if ds <= (TILEWIDTH * numTiles)**2:
+
+        # Checks if any ghost is chasing
+        if not Behaviors.checkIsChasing(self):
+            self.pacman.isCutoff[self.name] = False
+            self.pacman.isChasing[self.name] = True
+            return Behaviors.defaultChase(self)
+        
+        # if ds <= (TILEWIDTH * numTiles*1.5)**2:
+        
+        # Checks if any ghost is cutting off
+        if not Behaviors.checkIsCutoff(self):
+            self.pacman.isChasing[self.name] = False
+            self.pacman.isCutoff[self.name] = True
+            return Behaviors.cutoff(self)
+
+        
+        # Defaults to chasing
+        self.pacman.isCutoff[self.name] = False
+        self.pacman.isChasing[self.name] = True
+        return Behaviors.defaultChase(self)
+    
         # else if fruitSpawned:
         #   distance = fruit.pos - ghost.pos
         #   if distance <= 5:
@@ -132,7 +162,6 @@ class Behaviors(Ghost):
         # else:
         #   self.defaultChase()
 
-        pass
 
     def defaultChase(self):
         return self.pacman.position
@@ -169,10 +198,6 @@ class Blinky(Ghost):
         self.color = RED
         self.sprites = GhostSprites(self)
 
-    def dosomething(self):
-        pass
-        #self.goal = 
-
 class Pinky(Ghost):
     def __init__(self, node, pacman=None, blinky=None):
         Ghost.__init__(self, node, pacman, blinky)
@@ -183,8 +208,8 @@ class Pinky(Ghost):
     def scatter(self):
         self.goal = Vector2(TILEWIDTH*NCOLS, 0)
 
-    def chase(self):
-        self.goal = self.pacman.position + self.pacman.directions[self.pacman.direction] * TILEWIDTH * 4
+    # def chase(self):
+    #     self.goal = self.pacman.position + self.pacman.directions[self.pacman.direction] * TILEWIDTH * 4
     
 
 
@@ -198,10 +223,10 @@ class Inky(Ghost):
     def scatter(self):
         self.goal = Vector2(TILEWIDTH*NCOLS, TILEHEIGHT*NROWS)
 
-    def chase(self):
-        vec1 = self.pacman.position + self.pacman.directions[self.pacman.direction] * TILEWIDTH * 2
-        vec2 = (vec1 - self.blinky.position) * 2
-        self.goal = self.blinky.position + vec2
+    # def chase(self):
+    #     vec1 = self.pacman.position + self.pacman.directions[self.pacman.direction] * TILEWIDTH * 2
+    #     vec2 = (vec1 - self.blinky.position) * 2
+    #     self.goal = self.blinky.position + vec2
 
 
 
@@ -215,29 +240,31 @@ class Clyde(Ghost):
     def scatter(self):
         self.goal = Vector2(0, TILEHEIGHT*NROWS)
 
-    def chase(self):
-        d = self.pacman.position - self.position
-        ds = d.magnitudeSquared()
-        if ds <= (TILEWIDTH * 8)**2:
-            self.scatter()
-        else:
-            self.goal = self.pacman.position + self.pacman.directions[self.pacman.direction] * TILEWIDTH * 4
+    # def chase(self):
+    #     d = self.pacman.position - self.position
+    #     ds = d.magnitudeSquared()
+    #     if ds <= (TILEWIDTH * 8)**2:
+    #         self.scatter()
+    #     else:
+    #         self.goal = self.pacman.position + self.pacman.directions[self.pacman.direction] * TILEWIDTH * 4
     
 
 
 class GhostGroup(object):
     def __init__(self, node, pacman):
         self.blinky = Blinky(node, pacman)
-        # self.pinky = Pinky(node, pacman)
-        # self.inky = Inky(node, pacman, self.blinky)
-        # self.clyde = Clyde(node, pacman)
-        self.ghosts = [self.blinky]#, self.pinky, self.inky, self.clyde]
+        self.pinky = Pinky(node, pacman)
+        self.inky = Inky(node, pacman, self.blinky)
+        self.clyde = Clyde(node, pacman)
+        self.ghosts = [self.blinky, self.pinky, self.inky, self.clyde]
 
     def __iter__(self):
         return iter(self.ghosts)
 
     def update(self, dt):
         for ghost in self:
+            print("Chasing Dictionary: ", ghost.pacman.isChasing)
+            # print("Cutoff Dictionary: ", ghost.pacman.isChasing)
             ghost.update(dt)
 
 
