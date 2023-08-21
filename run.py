@@ -11,6 +11,8 @@ from text import TextGroup
 from sprites import LifeSprites
 from sprites import MazeSprites
 from mazedata import MazeData
+import sys
+
 
 class GameController(object):
     def __init__(self):
@@ -33,6 +35,74 @@ class GameController(object):
         self.fruitCaptured = []
         self.fruitNode = None
         self.mazedata = MazeData()
+        self.difficulty = None
+
+    def setDifficulty(self):
+        font = pygame.font.Font(None, 36)
+        running = True
+        difficulty = None
+        highlighted_difficulty = "none"
+        WIDTH, HEIGHT = SCREENSIZE[0], SCREENSIZE[1]
+
+        # Colors
+        WHITE = (255, 255, 255)
+        BLACK = (0, 0, 0)
+        RED = (255, 0, 0)
+        GREEN = (0, 255, 0)
+        BLUE = (0, 128, 255)
+        YELLOW = (227, 209, 45)
+
+
+        while running:
+            self.screen.fill(BLACK)
+
+            easy_color = GREEN if highlighted_difficulty == "easy" else WHITE
+            medium_color = YELLOW if highlighted_difficulty == "medium" else WHITE
+            hard_color = RED if highlighted_difficulty == "hard" else WHITE
+
+            # Render difficulty options
+            easy_text = font.render("Easy", True, easy_color)
+            medium_text = font.render("Medium", True, medium_color)
+            hard_text = font.render("Hard", True, hard_color)
+
+            # Positions
+            easy_rect = easy_text.get_rect(center=(WIDTH/2, HEIGHT/2 - 40))
+            medium_rect = medium_text.get_rect(center=(WIDTH/2, HEIGHT/2))
+            hard_rect = hard_text.get_rect(center=(WIDTH/2, HEIGHT/2 + 40))
+
+            self.screen.blit(easy_text, easy_rect.topleft)
+            self.screen.blit(medium_text, medium_rect.topleft)
+            self.screen.blit(hard_text, hard_rect.topleft)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    x, y = pygame.mouse.get_pos()
+                    if easy_rect.collidepoint(x, y):
+                        if highlighted_difficulty == "easy":
+                            difficulty = "easy"
+                            running = False
+                        else:
+                            highlighted_difficulty = "easy"
+                    elif medium_rect.collidepoint(x, y):
+                        if highlighted_difficulty == "medium":
+                            difficulty = "medium"
+                            running = False
+                        else:
+                            highlighted_difficulty = "medium"
+                    elif hard_rect.collidepoint(x, y):
+                        if highlighted_difficulty == "hard":
+                            difficulty = "hard"
+                            running = False
+                        else:
+                            highlighted_difficulty = "hard"
+
+            pygame.display.flip()
+            self.clock.tick(60)
+
+        self.difficulty = difficulty
 
     def setBackground(self):
         self.background_norm = pygame.surface.Surface(SCREENSIZE).convert()
@@ -45,6 +115,8 @@ class GameController(object):
         self.background = self.background_norm
 
     def startGame(self):      
+
+        
         self.mazedata.loadMaze(self.level)
         self.mazesprites = MazeSprites(self.mazedata.obj.name+".txt", self.mazedata.obj.name+"_rotation.txt")
         self.setBackground()
@@ -271,6 +343,8 @@ class GameController(object):
 
 if __name__ == "__main__":
     game = GameController()
+    game.setDifficulty()
+    print(game.difficulty)
     game.startGame()
     while True:
         game.update()
