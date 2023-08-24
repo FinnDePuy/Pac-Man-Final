@@ -188,7 +188,7 @@ class Behaviors(Ghost):
 
      # def collaborate(self):
     #     pass
-  
+
 
 
 
@@ -259,8 +259,11 @@ class GhostGroup(object):
         return iter(self.ghosts)
 
     def update(self, dt):   # dt = delta time, amount of time that has passed since last use 
+        flag = True
         for ghost in self:
-            print("Chasing Dictionary: ", ghost.pacman.isChasing)
+            if flag:
+                ghost.pacman.diagnostics()
+                flag = False
             ghost.update(dt)
 
 

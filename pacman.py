@@ -93,3 +93,30 @@ class Pacman(Entity):
         if dSquared <= rSquared:
             return True
         return False
+
+    def diagnostics(self):
+            # Define the mapping of numbers to names
+        name_mapping = {4: "BLINKY", 5: "PINKY", 6: "INKY", 7: "CLYDE"}
+
+        # List of all dictionaries with their names
+        dicts = [("isChasing", self.isChasing), ("isCutoff", self.isCutoff), ("lastPowerUp", self.lastPowerUp), 
+                ("guardPowerUp", self.guardPowerUp), ("fruitSpawned", self.fruitSpawned), ("guardFruit", self.guardFruit)]
+
+        # Determine the maximum width required for each column
+        max_width = max(len(name) for name in name_mapping.values()) + len(": True") + 2  # Account for ": True" or ": False" and some padding
+
+        # Print dictionary names in a single line with added padding to the left
+        for dict_name, _ in dicts:
+            print(f"{dict_name:<15}", end='')  # Use 15 spaces to ensure proper alignment of dictionary names
+        print()  # Move to the next line
+
+        # Print each row of values underneath their respective dictionary names
+        for key in name_mapping:
+            for _, d in dicts:
+                # Calculate the string representation of the key-value pair
+                kv_str = f"{name_mapping[key]}: {d[key]}"
+                # Calculate the padding needed to reach the desired distance of 15 spaces
+                padding = 15 - len(kv_str)
+                print(f"{kv_str}", end=' ' * padding)
+            print()  # Move to the next line
+        print()
