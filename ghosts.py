@@ -10,6 +10,7 @@ from behaviors import *
 from bt_nodes import Selector, Sequence, Action, Check
 import logging
 
+
 class Ghost(Entity):
     def __init__(self, node, pacman=None, blinky=None):
         Entity.__init__(self, node)
@@ -75,7 +76,7 @@ class Ghost(Entity):
     #     logging.info('\n' + root.tree_to_string())
     #     return root
 
-    
+
 class Behaviors(Ghost):
     # Helper function to check if any ghost is chasing
     def checkIsChasing(self):
@@ -211,8 +212,6 @@ class Pinky(Ghost):
     # def chase(self):
     #     self.goal = self.pacman.position + self.pacman.directions[self.pacman.direction] * TILEWIDTH * 4
     
-
-
 class Inky(Ghost):
     def __init__(self, node, pacman=None, blinky=None):
         Ghost.__init__(self, node, pacman, blinky)
@@ -227,8 +226,6 @@ class Inky(Ghost):
     #     vec1 = self.pacman.position + self.pacman.directions[self.pacman.direction] * TILEWIDTH * 2
     #     vec2 = (vec1 - self.blinky.position) * 2
     #     self.goal = self.blinky.position + vec2
-
-
 
 class Clyde(Ghost):
     def __init__(self, node, pacman=None, blinky=None):
@@ -261,10 +258,9 @@ class GhostGroup(object):
     def __iter__(self):
         return iter(self.ghosts)
 
-    def update(self, dt):
+    def update(self, dt):   # dt = delta time, amount of time that has passed since last use 
         for ghost in self:
             print("Chasing Dictionary: ", ghost.pacman.isChasing)
-            # print("Cutoff Dictionary: ", ghost.pacman.isChasing)
             ghost.update(dt)
 
 
@@ -300,3 +296,7 @@ class GhostGroup(object):
     def render(self, screen):
         for ghost in self:
             ghost.render(screen)
+
+def difficultySave(diff):
+    global difficulty
+    difficulty = diff

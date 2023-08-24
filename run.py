@@ -5,6 +5,7 @@ from pacman import Pacman
 from nodes import NodeGroup
 from pellets import PelletGroup
 from ghosts import GhostGroup
+from ghosts import difficultySave
 from fruit import Fruit
 from pauser import Pause
 from text import TextGroup
@@ -171,7 +172,7 @@ class GameController(object):
         
 
     def update(self):
-        dt = self.clock.tick(30) / 1000.0
+        dt = self.clock.tick(30) / 1000.0   # dt = delta time, amount of time that has passed since last use
         self.textgroup.update(dt)
         self.pellets.update(dt)
         if not self.pause.paused:
@@ -343,8 +344,8 @@ class GameController(object):
 
 if __name__ == "__main__":
     game = GameController()
-    game.setDifficulty()
-    print(game.difficulty)
+    game.setDifficulty()                # This asks the player to what difficulty they want
+    difficultySave(game.difficulty)     # This function passes the difficulty to ghost.py
     game.startGame()
     while True:
         game.update()
