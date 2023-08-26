@@ -93,12 +93,14 @@ class Behaviors(Ghost):
         return False
     
     def checkIfLastPowerUp(ghost):
-        for key, value in ghost.pacman.lastPowerUp.items():
-            if value == True:
-                if key == ghost.name:
-                    return True
-                return False
+        print("ppp: ", ppp)
         if len(ppp) == 1:
+            for key, value in ghost.pacman.lastPowerUp.items():
+                if value == True:
+                    if key == ghost.name:
+                        return True
+                    else:
+                        return False
             return True
         else:
             return False
@@ -206,8 +208,11 @@ class Behaviors(Ghost):
         pass
 
     def guardPower(ghost):
-        pos = Vector2(ppp[0][0]*TILEWIDTH, ppp[0][1]*TILEHEIGHT)
-        return pos 
+        pos = Vector2(ppp[0][1]*TILEWIDTH, ppp[0][0]*TILEHEIGHT)    # (y, x) i have no clue why but this works\
+        print("Guarding pos: ", pos)
+        
+        return pos
+        
         
 
     def groupUp(ghost):
@@ -334,6 +339,4 @@ def powerPelletPositions(list):
     ppp = list
 
 def powerPelletRemove(pelletPos):
-    print("Power pellet position", pelletPos)
-    print("PPP: ", ppp)
     ppp.remove(pelletPos)
