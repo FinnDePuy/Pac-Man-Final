@@ -2,6 +2,7 @@ import pygame
 from vector import Vector2
 from constants import *
 import numpy as np
+from ghosts import powerPelletPositions
 
 class Pellet(object):
     def __init__(self, row, column):
@@ -24,7 +25,7 @@ class PowerPellet(Pellet):
     def __init__(self, row, column):
         Pellet.__init__(self, row, column)
         self.name = POWERPELLET
-        self.radius = int(8 * TILEWIDTH / 16)
+        self.radius = int(8 * TILEWIDTH / 16)   #Size of pellet. 4x bigger than regular pellet
         self.points = 50
         self.flashTime = 0.2
         self.timer= 0
@@ -49,15 +50,17 @@ class PelletGroup(object):
                 
     def createPelletList(self, pelletfile):
         data = self.readPelletfile(pelletfile)        
+        ppp = [] # Power Pellet Positions in (x, y)
         for row in range(data.shape[0]):
             for col in range(data.shape[1]):
                 if data[row][col] in ['.', '+']:
                     self.pelletList.append(Pellet(row, col))
-                elif data[row][col] in ['P', 'p']:
+                elif data[row][col] in ['P', 'p']:  
+                    ppp.append((row, col))
                     pp = PowerPellet(row, col)
                     self.pelletList.append(pp)
                     self.powerpellets.append(pp)
-                    
+        powerPelletPositions(ppp)
     def readPelletfile(self, textfile):
         return np.loadtxt(textfile, dtype='<U1')
     

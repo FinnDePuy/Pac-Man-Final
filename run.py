@@ -5,7 +5,7 @@ from pacman import Pacman
 from nodes import NodeGroup
 from pellets import PelletGroup
 from ghosts import GhostGroup
-from ghosts import difficultySave
+from ghosts import difficultySave, powerPelletRemove
 from fruit import Fruit
 from pauser import Pause
 from text import TextGroup
@@ -229,9 +229,11 @@ class GameController(object):
             if self.pellets.numEaten == 70:
                 self.ghosts.clyde.startNode.allowAccess(LEFT, self.ghosts.clyde)
             self.pellets.pelletList.remove(pellet)
-            if pellet.name == POWERPELLET:
+            if pellet.name == POWERPELLET:      # Power pellet eaten
+                y, x = pellet.position.asTuple()
+                powerPelletRemove((int(x/TILEWIDTH), int(y/TILEHEIGHT)))
                 self.ghosts.startFreight()
-            if self.pellets.isEmpty():
+            if self.pellets.isEmpty():          # All pellets eaten, next level
                 self.flashBG = True
                 self.hideEntities()
                 self.pause.setPause(pauseTime=3, func=self.nextLevel)
