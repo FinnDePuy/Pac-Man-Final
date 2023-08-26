@@ -5,7 +5,7 @@ from pacman import Pacman
 from nodes import NodeGroup
 from pellets import PelletGroup
 from ghosts import GhostGroup
-from ghosts import difficultySave, powerPelletRemove
+from ghosts import difficultySave, powerPelletRemove#, ifFruitSpawned
 from fruit import Fruit
 from pauser import Pause
 from text import TextGroup
@@ -37,6 +37,7 @@ class GameController(object):
         self.fruitNode = None
         self.mazedata = MazeData()
         self.difficulty = None
+        #ifFruitSpawned(False, self.fruitNode)
 
     def setDifficulty(self):
         font = pygame.font.Font(None, 36)
@@ -266,6 +267,7 @@ class GameController(object):
         if self.pellets.numEaten == 50 or self.pellets.numEaten == 140:
             if self.fruit is None:
                 self.fruit = Fruit(self.nodes.getNodeFromTiles(9, 20), self.level)
+                #ifFruitSpawned(True, self.nodes.getNodeFromTiles(9, 20))
                 print(self.fruit)
         if self.fruit is not None:
             if self.pacman.collideCheck(self.fruit):

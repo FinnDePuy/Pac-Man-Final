@@ -84,8 +84,16 @@ class Behaviors(Ghost):
         return False
     
     # Helper function to check if any ghost is cutting off
-    def checkIsCutoff(ghost):
-        for key, value in ghost.pacman.isCutoff.items():
+    def checkIsCutoff1(ghost):
+        for key, value in ghost.pacman.isCutoff1.items():
+            if value == True:
+                if key == ghost.name:
+                    return False
+                return True
+        return False
+    
+    def checkIsCutoff2(ghost):
+        for key, value in ghost.pacman.isCutoff2.items():
             if value == True:
                 if key == ghost.name:
                     return False
@@ -104,11 +112,27 @@ class Behaviors(Ghost):
             return True
         else:
             return False
+        
+    # def checkIfFruitSpawned(ghost):
+    #     if fruitHasSpawned is True:
+    #         return True
+    #     else:
+    #         return False
+        
+    def checkIfGuardingPowerUp(ghost):
+        for key, value in ghost.pacman.guardPowerUp.items():
+            if value == True:
+                if key == ghost.name:
+                    return False
+                return True
+        return False
+
 
     def resetGhostChase(ghost):
         pacman = ghost.pacman
         pacman.isChasing[ghost.name] = False
-        pacman.isCutoff[ghost.name] = False
+        pacman.isCutoff1[ghost.name] = False
+        pacman.isCutoff2[ghost.name] = False
         pacman.lastPowerUp[ghost.name] = False
         pacman.guardPowerUp[ghost.name] = False
         pacman.fruitSpawned[ghost.name] = False
@@ -144,32 +168,74 @@ class Behaviors(Ghost):
 
         # if ds <= (TILEWIDTH * numTiles)**2:
 
-        # Checks if any ghost is chasing pacman
-        if not Behaviors.checkIsChasing(ghost): # If no ghost is chasing then chase
-            Behaviors.resetGhostChase(ghost)            # Resets ghost in all chasing dicts
-            ghost.pacman.isChasing[ghost.name] = True
-            return Behaviors.defaultChase(ghost)
-        
-        # if ds <= (TILEWIDTH * numTiles*1.5)**2:
-        
-        # Checks if any ghost is cutting off pacman
-        elif not Behaviors.checkIsCutoff(ghost):    # If no ghost is cutting off pacman then cutoff
-            Behaviors.resetGhostChase(ghost)
-            ghost.pacman.isCutoff[ghost.name] = True
-            return Behaviors.cutoff(ghost)
-        
-        # Checks if there is one power up left, and if there is someone already targeting it
-        elif Behaviors.checkIfLastPowerUp(ghost):   # If no ghost is going to last powerup then go there
-            Behaviors.resetGhostChase(ghost)
-            ghost.pacman.lastPowerUp[ghost.name] = True
-            return Behaviors.guardPower(ghost)
 
-        
-        # Defaults to chasing pacman
-        else:
-            Behaviors.resetGhostChase(ghost)
-            ghost.pacman.isChasing[ghost.name] = True
-            return Behaviors.defaultChase(ghost)
+        if difficulty == "easy":
+            if not Behaviors.checkIsChasing(ghost): # If no ghost is chasing then chase
+                Behaviors.resetGhostChase(ghost)            # Resets ghost in all chasing dicts
+                ghost.pacman.isChasing[ghost.name] = True
+                return Behaviors.defaultChase(ghost)
+            else:
+                # Defaults to chasing pacman
+                Behaviors.resetGhostChase(ghost)
+                ghost.pacman.isChasing[ghost.name] = True
+                return Behaviors.defaultChase(ghost)
+        if difficulty == "medium":
+            # Checks if any ghost is chasing pacman
+            if not Behaviors.checkIsChasing(ghost): # If no ghost is chasing then chase
+                Behaviors.resetGhostChase(ghost)            # Resets ghost in all chasing dicts
+                ghost.pacman.isChasing[ghost.name] = True
+                return Behaviors.defaultChase(ghost)
+            
+            elif not Behaviors.checkIsCutoff(ghost):    # If no ghost is cutting off pacman then cutoff
+                Behaviors.resetGhostChase(ghost)
+                ghost.pacman.isCutoff[ghost.name] = True
+                return Behaviors.cutoff(ghost)
+            else:
+                # Defaults to chasing pacman
+                Behaviors.resetGhostChase(ghost)
+                ghost.pacman.isChasing[ghost.name] = True
+                return Behaviors.defaultChase(ghost)
+        if difficulty == "hard":
+            # Checks if any ghost is chasing pacman
+            if not Behaviors.checkIsChasing(ghost): # If no ghost is chasing then chase
+                Behaviors.resetGhostChase(ghost)            # Resets ghost in all chasing dicts
+                ghost.pacman.isChasing[ghost.name] = True
+                return Behaviors.defaultChase(ghost)
+            
+            # if ds <= (TILEWIDTH * numTiles*1.5)**2:
+            
+            # Checks if any ghost is cutting off pacman
+            elif not Behaviors.checkIsCutoff1(ghost):    # If no ghost is cutting off pacman then cutoff
+                Behaviors.resetGhostChase(ghost)
+                ghost.pacman.isCutoff1[ghost.name] = True
+                return Behaviors.cutoff1(ghost)
+            
+            # Checks if any ghost is cutting off pacman
+            elif not Behaviors.checkIsCutoff2(ghost):    # If no ghost is cutting off pacman then cutoff
+                Behaviors.resetGhostChase(ghost)
+                ghost.pacman.isCutoff2[ghost.name] = True
+                return Behaviors.cutoff2(ghost)
+            
+            # Checks if there is one power up left, and if there is someone already targeting it
+            elif Behaviors.checkIfLastPowerUp(ghost) and not Behaviors.checkIfGuardingPowerUp(ghost):   # If no ghost is going to last powerup then go there
+                Behaviors.resetGhostChase(ghost)
+                ghost.pacman.lastPowerUp[ghost.name] = True
+                ghost.pacman.guardPowerUp[ghost.name] = True
+                return Behaviors.guardPower(ghost)
+            
+            # elif Behaviors.checkIfFruitSpawned(ghost):
+            #     if Behaviors.checkIfGuardingFruit(ghost):
+            #         Behaviors.resetGhostChase(ghost)
+            #         ghost.pacman.fruitSpawned[ghost.name] = True
+            #         return Behaviors.guardFruit(ghost)
+
+                
+            
+            # Defaults to chasing pacman
+            else:
+                Behaviors.resetGhostChase(ghost)
+                ghost.pacman.isChasing[ghost.name] = True
+                return Behaviors.defaultChase(ghost)
     
         # else if fruitSpawned:
         #   distance = fruit.pos - ghost.pos
@@ -196,16 +262,17 @@ class Behaviors(Ghost):
     def defaultChase(ghost):
         return ghost.pacman.position
 
-    def cutoff(ghost):
+    def cutoff1(ghost):
 
         return ghost.pacman.position + ghost.pacman.directions[ghost.pacman.direction] * TILEWIDTH * 4
     
-    def reverseCutOff(ghost):
-        return ghost.pacman.position - ghost.pacman.directions[ghost.pacman.direction] * TILEWIDTH * 4
+    def cutoff2(ghost):
+        return ghost.pacman.position + ghost.pacman.directions[ghost.pacman.direction] * TILEWIDTH * 6
 
-    def guardFruit(ghost):
-        # return self.fruit.position * 1
-        pass
+    # def guardFruit(ghost):
+    #     pos = fruitPosition
+    #     print("Fruit pos: ", pos)
+    #     return pos
 
     def guardPower(ghost):
         pos = Vector2(ppp[0][1]*TILEWIDTH, ppp[0][0]*TILEHEIGHT)    # (y, x) i have no clue why but this works\
@@ -337,6 +404,13 @@ def difficultySave(diff):
 def powerPelletPositions(list):
     global ppp # Power Pellet Positions = [(x1,y1), (x2,y2), (x3,y3), (x4,y4)]
     ppp = list
+
+# def ifFruitSpawned(bool, node):
+#     global fruitHasSpawned
+#     global fruitPosition
+#     if node is not None:
+#         fruitPosition = node.position
+#         fruitHasSpawned = bool
 
 def powerPelletRemove(pelletPos):
     ppp.remove(pelletPos)

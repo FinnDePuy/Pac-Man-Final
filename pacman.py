@@ -17,7 +17,8 @@ class Pacman(Entity):
 
         # Dictionaries for behaviors
         self.isChasing = {BLINKY : False, PINKY : False, INKY : False, CLYDE : False}
-        self.isCutoff = {BLINKY : False, PINKY : False, INKY : False, CLYDE : False}
+        self.isCutoff1 = {BLINKY : False, PINKY : False, INKY : False, CLYDE : False}
+        self.isCutoff2 = {BLINKY : False, PINKY : False, INKY : False, CLYDE : False}
         self.lastPowerUp = {BLINKY : False, PINKY : False, INKY : False, CLYDE : False}
         self.guardPowerUp = {BLINKY : False, PINKY : False, INKY : False, CLYDE : False}
         self.fruitSpawned = {BLINKY : False, PINKY : False, INKY : False, CLYDE : False}
@@ -99,7 +100,7 @@ class Pacman(Entity):
         name_mapping = {4: "BLINKY", 5: "PINKY", 6: "INKY", 7: "CLYDE"}
 
         # List of all dictionaries with their names
-        dicts = [("isChasing", self.isChasing), ("isCutoff", self.isCutoff), ("lastPowerUp", self.lastPowerUp), 
+        dicts = [("isChasing", self.isChasing), ("isCutoff1", self.isCutoff1), ("isCutoff2", self.isCutoff2), ("lastPowerUp", self.lastPowerUp), 
                 ("guardPowerUp", self.guardPowerUp), ("fruitSpawned", self.fruitSpawned), ("guardFruit", self.guardFruit)]
 
         # Determine the maximum width required for each column
