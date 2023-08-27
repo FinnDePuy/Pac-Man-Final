@@ -105,6 +105,7 @@ class GameController(object):
             self.clock.tick(60)
 
         self.difficulty = difficulty
+        print("difficulty = ", self.difficulty)
 
     def setBackground(self):
         self.background_norm = pygame.surface.Surface(SCREENSIZE).convert()
@@ -223,6 +224,9 @@ class GameController(object):
                         else:
                             self.textgroup.showText(PAUSETXT)
                             #self.hideEntities()
+                            self.setDifficulty()
+                            self.textgroup.updateDifficulty(self.difficulty)
+                            difficultySave(game.difficulty)
 
     def checkPelletEvents(self):
         pellet = self.pacman.eatPellets(self.pellets.pelletList)
