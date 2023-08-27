@@ -237,7 +237,7 @@ class GameController(object):
                 self.ghosts.inky.startNode.allowAccess(RIGHT, self.ghosts.inky)
             elif self.difficulty == "hard":
                 self.ghosts.inky.startNode.allowAccess(RIGHT, self.ghosts.inky)
-                if self.pellets.numEaten == 2:
+                if self.pellets.numEaten >= 2:
                     self.ghosts.clyde.startNode.allowAccess(LEFT, self.ghosts.clyde)
             if self.pellets.numEaten == 30:
                 self.ghosts.inky.startNode.allowAccess(RIGHT, self.ghosts.inky)
