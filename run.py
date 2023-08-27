@@ -139,9 +139,9 @@ class GameController(object):
 
         self.nodes.denyHomeAccess(self.pacman)
         self.nodes.denyHomeAccessList(self.ghosts)
-        if difficultySave == "easy" or difficultySave == "medium":
-            self.ghosts.inky.startNode.denyAccess(RIGHT, self.ghosts.inky)
-            self.ghosts.clyde.startNode.denyAccess(LEFT, self.ghosts.clyde)
+        # if difficultySave == "easy" or difficultySave == "medium" or difficultySave == "hard":
+        self.ghosts.inky.startNode.denyAccess(RIGHT, self.ghosts.inky)
+        self.ghosts.clyde.startNode.denyAccess(LEFT, self.ghosts.clyde)
         self.mazedata.obj.denyGhostsAccess(self.ghosts, self.nodes)
         fruitNode(self.fruit)
 
@@ -233,11 +233,12 @@ class GameController(object):
         if pellet:
             self.pellets.numEaten += 1
             self.updateScore(pellet.points)
-            if difficultySave == "medium":
+            if self.difficulty == "medium":
                 self.ghosts.inky.startNode.allowAccess(RIGHT, self.ghosts.inky)
-            elif difficultySave == "hard":
+            elif self.difficulty == "hard":
                 self.ghosts.inky.startNode.allowAccess(RIGHT, self.ghosts.inky)
-                self.ghosts.clyde.startNode.allowAccess(LEFT, self.ghosts.clyde)
+                if self.pellets.numEaten == 2:
+                    self.ghosts.clyde.startNode.allowAccess(LEFT, self.ghosts.clyde)
             if self.pellets.numEaten == 30:
                 self.ghosts.inky.startNode.allowAccess(RIGHT, self.ghosts.inky)
             if self.pellets.numEaten == 70:
