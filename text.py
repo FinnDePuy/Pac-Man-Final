@@ -60,10 +60,14 @@ class TextGroup(object):
         size = TILEHEIGHT
         self.alltext[SCORETXT] = Text("0".zfill(8), WHITE, 0, TILEHEIGHT, size)
         self.alltext[LEVELTXT] = Text(str(1).zfill(3), WHITE, 23*TILEWIDTH, TILEHEIGHT, size)
+        
+        self.alltext[DIFFICULTYTXT] = Text(str(1), WHITE, 12*TILEWIDTH, TILEHEIGHT, size)
+        
         self.alltext[READYTXT] = Text("READY!", YELLOW, 11.25*TILEWIDTH, 20*TILEHEIGHT, size, visible=False)
         self.alltext[PAUSETXT] = Text("PAUSED!", YELLOW, 10.625*TILEWIDTH, 20*TILEHEIGHT, size, visible=False)
         self.alltext[GAMEOVERTXT] = Text("GAMEOVER!", YELLOW, 10*TILEWIDTH, 20*TILEHEIGHT, size, visible=False)
         self.addText("SCORE", WHITE, 0, 0, size)
+        self.addText("DIFFICULTY", WHITE, 10*TILEWIDTH, 0, size)
         self.addText("LEVEL", WHITE, 23*TILEWIDTH, 0, size)
 
     def update(self, dt):
@@ -86,6 +90,15 @@ class TextGroup(object):
 
     def updateLevel(self, level):
         self.updateText(LEVELTXT, str(level + 1).zfill(3))
+    
+    def updateDifficulty(self, difficulty):
+        if difficulty == "easy":
+            self.alltext[DIFFICULTYTXT].color = GREEN
+        elif difficulty == "medium":
+            self.alltext[DIFFICULTYTXT].color = ORANGE
+        elif difficulty == "hard":
+            self.alltext[DIFFICULTYTXT].color = RED
+        self.updateText(DIFFICULTYTXT, str(difficulty))
 
     def updateText(self, id, value):
         if id in self.alltext.keys():

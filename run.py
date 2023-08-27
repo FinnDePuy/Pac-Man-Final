@@ -5,7 +5,7 @@ from pacman import Pacman
 from nodes import NodeGroup
 from pellets import PelletGroup
 from ghosts import GhostGroup
-from ghosts import difficultySave, powerPelletRemove#, ifFruitSpawned
+from ghosts import difficultySave, powerPelletRemove, fruitNode
 from fruit import Fruit
 from pauser import Pause
 from text import TextGroup
@@ -36,7 +36,7 @@ class GameController(object):
         self.fruitCaptured = []
         self.fruitNode = None
         self.mazedata = MazeData()
-        self.difficulty = None
+        self.difficulty = "easy"
         #ifFruitSpawned(False, self.fruitNode)
 
     def setDifficulty(self):
@@ -116,9 +116,10 @@ class GameController(object):
         self.flashBG = False
         self.background = self.background_norm
 
-    def startGame(self):      
+    def startGame(self):
 
-        
+        self.textgroup.updateDifficulty(self.difficulty)
+
         self.mazedata.loadMaze(self.level)
         self.mazesprites = MazeSprites(self.mazedata.obj.name+".txt", self.mazedata.obj.name+"_rotation.txt")
         self.setBackground()
@@ -137,9 +138,11 @@ class GameController(object):
 
         self.nodes.denyHomeAccess(self.pacman)
         self.nodes.denyHomeAccessList(self.ghosts)
-        self.ghosts.inky.startNode.denyAccess(RIGHT, self.ghosts.inky)
-        self.ghosts.clyde.startNode.denyAccess(LEFT, self.ghosts.clyde)
+        if difficultySave == "easy" or difficultySave == "medium":
+            self.ghosts.inky.startNode.denyAccess(RIGHT, self.ghosts.inky)
+            self.ghosts.clyde.startNode.denyAccess(LEFT, self.ghosts.clyde)
         self.mazedata.obj.denyGhostsAccess(self.ghosts, self.nodes)
+        fruitNode(self.fruit)
 
     def startGame_old(self):      
         self.mazedata.loadMaze(self.level)#######
@@ -183,6 +186,7 @@ class GameController(object):
             self.checkPelletEvents()
             self.checkGhostEvents()
             self.checkFruitEvents()
+            fruitNode(self.fruit)
 
         if self.pacman.alive:
             if not self.pause.paused:
@@ -225,6 +229,11 @@ class GameController(object):
         if pellet:
             self.pellets.numEaten += 1
             self.updateScore(pellet.points)
+            if difficultySave == "medium":
+                self.ghosts.inky.startNode.allowAccess(RIGHT, self.ghosts.inky)
+            elif difficultySave == "hard":
+                self.ghosts.inky.startNode.allowAccess(RIGHT, self.ghosts.inky)
+                self.ghosts.clyde.startNode.allowAccess(LEFT, self.ghosts.clyde)
             if self.pellets.numEaten == 30:
                 self.ghosts.inky.startNode.allowAccess(RIGHT, self.ghosts.inky)
             if self.pellets.numEaten == 70:

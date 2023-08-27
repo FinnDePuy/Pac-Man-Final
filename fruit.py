@@ -8,7 +8,7 @@ class Fruit(Entity):
         Entity.__init__(self, node)
         self.name = FRUIT
         self.color = GREEN
-        self.lifespan = 5
+        self.lifespan = 25
         self.timer = 0
         self.destroy = False
         self.points = 100 + level*20
