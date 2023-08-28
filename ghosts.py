@@ -99,6 +99,14 @@ class Behaviors(Ghost):
                 return True
         return False
     
+    def checkIsCutoff3(ghost):
+        for key, value in ghost.pacman.isCutoff3.items():
+            if value == True:
+                if key == ghost.name:
+                    return False
+                return True
+        return False
+    
     def checkIfLastPowerUp(ghost):
         if len(ppp) == 1:
             for key, value in ghost.pacman.lastPowerUp.items():
@@ -136,43 +144,132 @@ class Behaviors(Ghost):
         pacman.isChasing[ghost.name] = False
         pacman.isCutoff1[ghost.name] = False
         pacman.isCutoff2[ghost.name] = False
+        pacman.isCutoff3[ghost.name] = False
         pacman.lastPowerUp[ghost.name] = False
         pacman.guardPowerUp[ghost.name] = False
         pacman.fruitSpawned[ghost.name] = False
         pacman.guardFruit[ghost.name] = False
+    
+    def Medium_Attack(ghost):
+        # Various attack behaviors
+        if not Behaviors.checkIsChasing(ghost): # Chase
+            Behaviors.resetGhostChase(ghost)            
+            ghost.pacman.isChasing[ghost.name] = True
+            return Behaviors.defaultChase(ghost)
+        
+        elif not Behaviors.checkIsCutoff1(ghost): # Cutoff Close Distance
+            Behaviors.resetGhostChase(ghost)            
+            ghost.pacman.isCutoff1[ghost.name] = True
+            return Behaviors.cutoff1(ghost)
+        
+        elif not Behaviors.checkIsCutoff2(ghost): # Cutoff Medium Distance
+            Behaviors.resetGhostChase(ghost)           
+            ghost.pacman.isCutoff2[ghost.name] = True
+            return Behaviors.cutoff2(ghost)
+        
+        elif not Behaviors.checkIsCutoff3(ghost): # Cutoff Large Distance
+            Behaviors.resetGhostChase(ghost)            
+            ghost.pacman.isCutoff3[ghost.name] = True
+            return Behaviors.cutoff3(ghost)
+        
+        else:
+            Behaviors.resetGhostChase(ghost) # Default Chase
+            ghost.pacman.isChasing[ghost.name] = True
+            return Behaviors.defaultChase(ghost)
+        
 
     def selector(ghost):
-        #used to calculate distance if needed in behaviors
-        d = ghost.pacman.position - ghost.position
-        ds = d.magnitudeSquared()
-        numTiles = 8
+        # Arbitrary range for distance calculation
+        numTiles = 24
 
+        # Behaviors for easy difficulty
         if difficulty == "easy":
-            if not Behaviors.checkIsChasing(ghost): # If no ghost is chasing then chase
-                Behaviors.resetGhostChase(ghost)            # Resets ghost in all chasing dicts
-                ghost.pacman.isChasing[ghost.name] = True
-                return Behaviors.defaultChase(ghost)
-            else:
-                # Defaults to chasing pacman
-                Behaviors.resetGhostChase(ghost)
-                ghost.pacman.isChasing[ghost.name] = True
-                return Behaviors.defaultChase(ghost)
-        if difficulty == "medium":
-            # Checks if any ghost is chasing pacman
-            if not Behaviors.checkIsChasing(ghost): # If no ghost is chasing then chase
-                Behaviors.resetGhostChase(ghost)            # Resets ghost in all chasing dicts
-                ghost.pacman.isChasing[ghost.name] = True
-                return Behaviors.defaultChase(ghost)
+
+            # Blinky Behavior
+            if ghost.name == BLINKY:
+                d = ghost.pacman.position - Vector2(0, 0) # Calculating distance of pacman to Blinky's path
+                ds = d.magnitudeSquared()
+                if ds <= (TILEWIDTH * numTiles)**2: # If pacman is within range of Blinky's path, chase
+                    return Behaviors.defaultChase(ghost) 
+                else: # If not, continue following path
+                    return Vector2(0, 0)
             
-            elif not Behaviors.checkIsCutoff1(ghost):    # If no ghost is cutting off pacman then cutoff
-                Behaviors.resetGhostChase(ghost)
-                ghost.pacman.isCutoff1[ghost.name] = True
-                return Behaviors.cutoff1(ghost)
-            else:
-                # Defaults to chasing pacman
-                Behaviors.resetGhostChase(ghost)
-                ghost.pacman.isChasing[ghost.name] = True
-                return Behaviors.defaultChase(ghost)
+            # Pinky Behavior
+            if ghost.name == PINKY:
+                d = ghost.pacman.position - Vector2(TILEWIDTH*NCOLS, 0) # Calculating distance of pacman to Pinky's path
+                ds = d.magnitudeSquared()
+                if ds <= (TILEWIDTH * numTiles)**2: # If pacman is within range of Pinky's path, chase
+                    return Behaviors.defaultChase(ghost)
+                else: # If not, continue following path
+                    return Vector2(TILEWIDTH*NCOLS, 0)
+            
+            # Inky Behavior
+            if ghost.name == INKY:
+                d = ghost.pacman.position - Vector2(TILEWIDTH*NCOLS, TILEHEIGHT*NROWS) # Calculating distance of pacman to Inky's path
+                ds = d.magnitudeSquared()
+                if ds <= (TILEWIDTH * numTiles)**2: # If pacman is within range of Inky's path, chase
+                    return Behaviors.defaultChase(ghost)
+                else: # If not, continue following path
+                    return Vector2(TILEWIDTH*NCOLS, TILEHEIGHT*NROWS)
+            
+            # Clyde Behavior
+            if ghost.name == CLYDE:
+                d = ghost.pacman.position - Vector2(0, TILEHEIGHT*NROWS) # Calculating distance of pacman to Clyde's path
+                ds = d.magnitudeSquared()
+                if ds <= (TILEWIDTH * numTiles)**2: # If pacman is within range of Clyde's path, chase
+                    return Behaviors.defaultChase(ghost)
+                else: # If not, continue following path
+                    return Vector2(0, TILEHEIGHT*NROWS)
+        
+        
+        # Behaviors for medium difficulty
+        if difficulty == "medium":
+            numTiles = 30 # Increase range of attack
+
+            # Blinky Behavior
+            if ghost.name == BLINKY:
+                d = ghost.pacman.position - Vector2(0, 0) # Calculating distance of pacman to Blinky's path
+                ds = d.magnitudeSquared()
+
+                if ds <= (TILEWIDTH * numTiles)**2: # If pacman is within range of Blinky's path, attack
+                    return Behaviors.Medium_Attack(ghost)
+                else:
+                    Behaviors.resetGhostChase(ghost)
+                    return Vector2(0, 0)
+ 
+            # Pinky Behavior           
+            if ghost.name == PINKY:
+                d = ghost.pacman.position - Vector2(TILEWIDTH*NCOLS, 0) # Calculating distance of pacman to Pinky's path
+                ds = d.magnitudeSquared()
+
+                if ds <= (TILEWIDTH * numTiles)**2: # If pacman is within range of Pinky's path, attack
+                    return Behaviors.Medium_Attack(ghost)
+                else:
+                    Behaviors.resetGhostChase(ghost)
+                    return Vector2(TILEWIDTH*NCOLS, 0)
+            
+            # Inky Behavior  
+            if ghost.name == INKY: 
+                d = ghost.pacman.position - Vector2(TILEWIDTH*NCOLS, TILEHEIGHT*NROWS) # Calculating distance of pacman to Inky's path
+                ds = d.magnitudeSquared()
+
+                if ds <= (TILEWIDTH * numTiles)**2: # If pacman is within range of Inky's path, attack
+                    return Behaviors.Medium_Attack(ghost)
+                else:
+                    Behaviors.resetGhostChase(ghost)
+                    return Vector2(TILEWIDTH*NCOLS, TILEHEIGHT*NROWS)
+            
+            # Clyde Behavior  
+            if ghost.name == CLYDE:
+                d = ghost.pacman.position - Vector2(0, TILEHEIGHT*NROWS) # Calculating distance of pacman to Clyde's path
+                ds = d.magnitudeSquared()
+
+                if ds <= (TILEWIDTH * numTiles)**2: # If pacman is within range of Clyde's path, attack
+                    return Behaviors.Medium_Attack(ghost)
+                else:
+                    Behaviors.resetGhostChase(ghost)
+                    return Vector2(0, TILEHEIGHT*NROWS)
+                
         if difficulty == "hard":
             # Checks if any ghost is chasing pacman
             if not Behaviors.checkIsChasing(ghost): # If no ghost is chasing then chase
@@ -204,6 +301,11 @@ class Behaviors(Ghost):
                 Behaviors.resetGhostChase(ghost)
                 ghost.pacman.fruitSpawned[ghost.name] = True
                 return Behaviors.guardFruit(ghost)
+            
+            elif not Behaviors.checkIsCutoff3(ghost):    # If no ghost is cutting off pacman then cutoff
+                Behaviors.resetGhostChase(ghost)
+                ghost.pacman.isCutoff3[ghost.name] = True
+                return Behaviors.cutoff3(ghost)
 
             # Defaults to chasing pacman
             else:
@@ -215,24 +317,27 @@ class Behaviors(Ghost):
     def defaultChase(ghost):
         return ghost.pacman.position
 
+    # Cutoff close distance
     def cutoff1(ghost):
-
-        return ghost.pacman.position + ghost.pacman.directions[ghost.pacman.direction] * TILEWIDTH * 4
+        return ghost.pacman.position + ghost.pacman.directions[ghost.pacman.direction] * TILEWIDTH * 2
     
+    # Cutoff medium distance
     def cutoff2(ghost):
-        return ghost.pacman.position + ghost.pacman.directions[ghost.pacman.direction] * TILEWIDTH * 6
+        return ghost.pacman.position + ghost.pacman.directions[ghost.pacman.direction] * TILEWIDTH * 4
 
+    # Cutoff large distance
+    def cutoff3(ghost):
+        return ghost.pacman.position + ghost.pacman.directions[ghost.pacman.direction] * TILEWIDTH * 6
+    
+    # Scatters to the fruit
     def guardFruit(ghost):
         return fruitNinja.position
 
+    # Scatters to the last powerup
     def guardPower(ghost):
-        pos = Vector2(ppp[0][1]*TILEWIDTH, ppp[0][0]*TILEHEIGHT)    # (y, x) i have no clue why but this works\
+        pos = Vector2(ppp[0][1]*TILEWIDTH, ppp[0][0]*TILEHEIGHT)  
         return pos
         
-        
-
-    def groupUp(ghost):
-        pass
 
 
 
@@ -284,12 +389,12 @@ class Clyde(Ghost):
         self.goal = Vector2(0, TILEHEIGHT*NROWS)
 
     # def chase(self):
-    #     d = self.pacman.position - self.position
-    #     ds = d.magnitudeSquared()
-    #     if ds <= (TILEWIDTH * 8)**2:
-    #         self.scatter()
-    #     else:
-    #         self.goal = self.pacman.position + self.pacman.directions[self.pacman.direction] * TILEWIDTH * 4
+        # d = self.pacman.position - self.position
+        # ds = d.magnitudeSquared()
+        # if ds <= (TILEWIDTH * 8)**2:
+        #     self.scatter()
+        # else:
+        #     self.goal = self.pacman.position + self.pacman.directions[self.pacman.direction] * TILEWIDTH * 4
     
 
 
