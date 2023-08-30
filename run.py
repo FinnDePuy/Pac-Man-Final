@@ -1,4 +1,5 @@
 import pygame
+import random
 from pygame.locals import *
 from constants import *
 from pacman import Pacman
@@ -275,6 +276,13 @@ class GameController(object):
                             self.textgroup.showText(GAMEOVERTXT)
                             self.pause.setPause(pauseTime=3, func=self.restartGame)
                         else:
+                            colors = [RED, TEAL, TEAL, ORANGE]
+                            random.shuffle(colors)
+                            number = 0
+                            self.ghosts.pinky.color = colors[0]
+                            self.ghosts.blinky.color = colors[1]
+                            self.ghosts.inky.color = colors[2]
+                            self.ghosts.clyde.color = colors[3]
                             self.pause.setPause(pauseTime=3, func=self.resetLevel)
     
     def checkFruitEvents(self):

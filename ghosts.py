@@ -1,4 +1,5 @@
 import pygame
+import random
 from pygame.locals import *
 from vector import Vector2
 from constants import *
@@ -263,7 +264,6 @@ class Behaviors(Ghost):
             if ghost.name == CLYDE:
                 d = ghost.pacman.position - Vector2(0, TILEHEIGHT*NROWS) # Calculating distance of pacman to Clyde's path
                 ds = d.magnitudeSquared()
-
                 if ds <= (TILEWIDTH * numTiles)**2: # If pacman is within range of Clyde's path, attack
                     return Behaviors.Medium_Attack(ghost)
                 else:
@@ -271,22 +271,33 @@ class Behaviors(Ghost):
                     return Vector2(0, TILEHEIGHT*NROWS)
                 
         if difficulty == "hard":
+            # If pacman gets too close to fruit or powerUp, cut pacman off
+            if ghost.pacman.fruitSpawned[ghost.name] or ghost.pacman.guardPowerUp[ghost.name]:
+                pos = Vector2(ppp[0][1]*TILEWIDTH, ppp[0][0]*TILEHEIGHT)
+                d = ghost.pacman.position - pos
+                ds = d.magnitudeSquared()
+                if ds <= (TILEWIDTH * 8)**2:
+                    return Behaviors.cutoff1(ghost)
+                           
             # Checks if any ghost is chasing pacman
             if not Behaviors.checkIsChasing(ghost): # If no ghost is chasing then chase
                 Behaviors.resetGhostChase(ghost)            # Resets ghost in all chasing dicts
                 ghost.pacman.isChasing[ghost.name] = True
+                print("chase", ghost.pacman.position) 
                 return Behaviors.defaultChase(ghost)
             
             # Checks if any ghost is cutting off pacman
             elif not Behaviors.checkIsCutoff1(ghost):    # If no ghost is cutting off pacman then cutoff
                 Behaviors.resetGhostChase(ghost)
                 ghost.pacman.isCutoff1[ghost.name] = True
+                print("cuttoff1", ghost.pacman.position + ghost.pacman.directions[ghost.pacman.direction] * TILEWIDTH * 4) 
                 return Behaviors.cutoff1(ghost)
             
             # Checks if any ghost is cutting off pacman
             elif not Behaviors.checkIsCutoff2(ghost):    # If no ghost is cutting off pacman then cutoff
                 Behaviors.resetGhostChase(ghost)
                 ghost.pacman.isCutoff2[ghost.name] = True
+                print("cuttoff2", ghost.pacman.position + ghost.pacman.directions[ghost.pacman.direction] * TILEWIDTH * 8) 
                 return Behaviors.cutoff2(ghost)
             
             # Checks if there is one power up left, and if there is someone already targeting it
@@ -305,6 +316,7 @@ class Behaviors(Ghost):
             elif not Behaviors.checkIsCutoff3(ghost):    # If no ghost is cutting off pacman then cutoff
                 Behaviors.resetGhostChase(ghost)
                 ghost.pacman.isCutoff3[ghost.name] = True
+                print("cuttoff3", ghost.pacman.position + ghost.pacman.directions[ghost.pacman.direction] * TILEWIDTH * 12) 
                 return Behaviors.cutoff3(ghost)
 
             # Defaults to chasing pacman
