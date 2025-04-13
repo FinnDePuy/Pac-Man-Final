@@ -1,5 +1,7 @@
+import asyncio
 import pygame
 import random
+import sys
 from pygame.locals import *
 from constants import *
 from pacman import Pacman
@@ -13,7 +15,6 @@ from text import TextGroup
 from sprites import LifeSprites
 from sprites import MazeSprites
 from mazedata import MazeData
-import sys
 
 
 class GameController(object):
@@ -38,7 +39,6 @@ class GameController(object):
         self.fruitNode = None
         self.mazedata = MazeData()
         self.difficulty = "easy"
-        #ifFruitSpawned(False, self.fruitNode)
 
     def setDifficulty(self):
         font = pygame.font.Font(None, 36)
@@ -54,7 +54,6 @@ class GameController(object):
         GREEN = (0, 255, 0)
         BLUE = (0, 128, 255)
         YELLOW = (227, 209, 45)
-
 
         while running:
             self.screen.fill(BLACK)
@@ -119,9 +118,7 @@ class GameController(object):
         self.background = self.background_norm
 
     def startGame(self):
-
         self.textgroup.updateDifficulty(self.difficulty)
-
         self.mazedata.loadMaze(self.level)
         self.mazesprites = MazeSprites(self.mazedata.obj.name+".txt", self.mazedata.obj.name+"_rotation.txt")
         self.setBackground()
@@ -140,14 +137,13 @@ class GameController(object):
 
         self.nodes.denyHomeAccess(self.pacman)
         self.nodes.denyHomeAccessList(self.ghosts)
-        # if difficultySave == "easy" or difficultySave == "medium" or difficultySave == "hard":
         self.ghosts.inky.startNode.denyAccess(RIGHT, self.ghosts.inky)
         self.ghosts.clyde.startNode.denyAccess(LEFT, self.ghosts.clyde)
         self.mazedata.obj.denyGhostsAccess(self.ghosts, self.nodes)
         fruitNode(self.fruit)
 
-    def startGame_old(self):      
-        self.mazedata.loadMaze(self.level)#######
+    def startGame_old(self):
+        self.mazedata.loadMaze(self.level)
         self.mazesprites = MazeSprites("maze1.txt", "maze1_rotation.txt")
         self.setBackground()
         self.nodes = NodeGroup("maze1.txt")
@@ -175,14 +171,12 @@ class GameController(object):
         self.nodes.denyAccessList(12, 26, UP, self.ghosts)
         self.nodes.denyAccessList(15, 26, UP, self.ghosts)
 
-        
-
-    def update(self):
-        dt = self.clock.tick(30) / 1000.0   # dt = delta time, amount of time that has passed since last use
+    async def update(self):  # Made async
+        dt = self.clock.tick(30) / 1000.0
         self.textgroup.update(dt)
         self.pellets.update(dt)
         if not self.pause.paused:
-            self.ghosts.update(dt)      
+            self.ghosts.update(dt)
             if self.fruit is not None:
                 self.fruit.update(dt)
             self.checkPelletEvents()
@@ -210,11 +204,13 @@ class GameController(object):
             afterPauseMethod()
         self.checkEvents()
         self.render()
+        await asyncio.sleep(0)  # Yield to browser
 
     def checkEvents(self):
         for event in pygame.event.get():
             if event.type == QUIT:
-                exit()
+                pygame.quit()
+                sys.exit()
             elif event.type == KEYDOWN:
                 if event.key == K_SPACE:
                     if self.pacman.alive:
@@ -224,10 +220,9 @@ class GameController(object):
                             self.showEntities()
                         else:
                             self.textgroup.showText(PAUSETXT)
-                            #self.hideEntities()
                             self.setDifficulty()
                             self.textgroup.updateDifficulty(self.difficulty)
-                            difficultySave(game.difficulty)
+                            difficultySave(self.difficulty)
 
     def checkPelletEvents(self):
         pellet = self.pacman.eatPellets(self.pellets.pelletList)
@@ -245,11 +240,11 @@ class GameController(object):
             if self.pellets.numEaten == 70:
                 self.ghosts.clyde.startNode.allowAccess(LEFT, self.ghosts.clyde)
             self.pellets.pelletList.remove(pellet)
-            if pellet.name == POWERPELLET:      # Power pellet eaten
+            if pellet.name == POWERPELLET:
                 y, x = pellet.position.asTuple()
                 powerPelletRemove((int(x/TILEWIDTH), int(y/TILEHEIGHT)))
                 self.ghosts.startFreight()
-            if self.pellets.isEmpty():          # All pellets eaten, next level
+            if self.pellets.isEmpty():
                 self.flashBG = True
                 self.hideEntities()
                 self.pause.setPause(pauseTime=3, func=self.nextLevel)
@@ -260,7 +255,7 @@ class GameController(object):
                 if ghost.mode.current is FREIGHT:
                     self.pacman.visible = False
                     ghost.visible = False
-                    self.updateScore(ghost.points)                  
+                    self.updateScore(ghost.points)
                     self.textgroup.addText(str(ghost.points), WHITE, ghost.position.x, ghost.position.y, 8, time=1)
                     self.ghosts.updatePoints()
                     self.pause.setPause(pauseTime=1, func=self.showEntities)
@@ -268,9 +263,9 @@ class GameController(object):
                     self.nodes.allowHomeAccess(ghost)
                 elif ghost.mode.current is not SPAWN:
                     if self.pacman.alive:
-                        self.lives -=  1
+                        self.lives -= 1
                         self.lifesprites.removeImage()
-                        self.pacman.die()               
+                        self.pacman.die()
                         self.ghosts.hide()
                         if self.lives <= 0:
                             self.textgroup.showText(GAMEOVERTXT)
@@ -278,18 +273,16 @@ class GameController(object):
                         else:
                             colors = [RED, TEAL, TEAL, ORANGE]
                             random.shuffle(colors)
-                            number = 0
                             self.ghosts.pinky.color = colors[0]
                             self.ghosts.blinky.color = colors[1]
                             self.ghosts.inky.color = colors[2]
                             self.ghosts.clyde.color = colors[3]
                             self.pause.setPause(pauseTime=3, func=self.resetLevel)
-    
+
     def checkFruitEvents(self):
         if self.pellets.numEaten == 50 or self.pellets.numEaten == 140:
             if self.fruit is None:
                 self.fruit = Fruit(self.nodes.getNodeFromTiles(9, 20), self.level)
-                #ifFruitSpawned(True, self.nodes.getNodeFromTiles(9, 20))
                 print(self.fruit)
         if self.fruit is not None:
             if self.pacman.collideCheck(self.fruit):
@@ -347,7 +340,6 @@ class GameController(object):
 
     def render(self):
         self.screen.blit(self.background, (0, 0))
-        #self.nodes.render(self.screen)
         self.pellets.render(self.screen)
         if self.fruit is not None:
             self.fruit.render(self.screen)
@@ -368,13 +360,14 @@ class GameController(object):
         pygame.display.update()
 
 
-if __name__ == "__main__":
+async def main():
     game = GameController()
-    game.setDifficulty()                # This asks the player to what difficulty they want
-    difficultySave(game.difficulty)     # This function passes the difficulty to ghost.py
+    game.setDifficulty()  # Synchronous difficulty selection
+    difficultySave(game.difficulty)
     game.startGame()
     while True:
-        game.update()
+        await game.update()  # Call async update
 
 
-
+if __name__ == "__main__":
+    asyncio.run(main())
